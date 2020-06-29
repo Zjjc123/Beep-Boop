@@ -10,7 +10,7 @@ public class Weapon : MonoBehaviour
     private GameObject bulletPrefab;
 
     [SerializeField]
-    private float bulletForce = 20f;
+    private float bulletForce = 30f;
     
     private void Update()
     {
