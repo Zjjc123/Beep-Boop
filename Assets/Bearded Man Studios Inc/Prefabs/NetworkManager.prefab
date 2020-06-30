@@ -52,5 +52,6 @@ MonoBehaviour:
   - {fileID: 139536, guid: 661f29f0c0c86fa47b6015bd602d0ac6, type: 3}
   PlayerNetworkObject:
   - {fileID: 2054661113498224314, guid: 035726c5126fccf4ab55f57abbd9fd72, type: 3}
-  TestNetworkObject: []
+  ProjectileNetworkObject:
+  - {fileID: 2383173086244400379, guid: 5468f61e9d300fe458d070896322fbf7, type: 3}
   automaticScenes: 1

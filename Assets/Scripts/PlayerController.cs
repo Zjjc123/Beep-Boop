@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using BeardedManStudios.Forge.Networking.Generated;
+using BeardedManStudios.Forge.Networking;
+using BeardedManStudios.Forge.Networking.Unity;
 
-public class Movement : PlayerBehavior
+public class PlayerController : PlayerBehavior
 {
     [SerializeField]
     private float speed = 5f;
@@ -11,6 +13,16 @@ public class Movement : PlayerBehavior
     public Rigidbody2D rb;
 
     Vector2 movement;
+
+    [SerializeField]
+    private Transform gunPoint;
+
+    private uint playerID;
+
+    private void Initialize()
+    {
+        playerID = networkObject.MyPlayerId;       
+    }
 
     private void Update()
     {
@@ -36,5 +48,27 @@ public class Movement : PlayerBehavior
         // Update this object on the network
         networkObject.position = transform.position;
         networkObject.rotation = transform.rotation;
+
+        Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -10);
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            networkObject.SendRpc(RPC_SHOOT, Receivers.Server, gunPoint.position, gunPoint.rotation, 0);
+        }
+    }
+
+    public override void Shoot(RpcArgs args)
+    {
+        MainThreadManager.Run(() =>
+        {
+            Vector3 pos = args.GetNext<Vector3>();
+            Quaternion rot = args.GetNext<Quaternion>();
+            int index = args.GetNext<int>();
+
+            if (NetworkManager.Instance.IsServer)
+            {
+                ProjectileBehavior pb = NetworkManager.Instance.InstantiateProjectile(index, pos, rot);
+            }
+        });
     }
 }

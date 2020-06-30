@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2054661113498224315}
   - component: {fileID: 2054661113498224318}
   - component: {fileID: 2054661113498224313}
-  - component: {fileID: 2054661113498224319}
   - component: {fileID: 2054661113498224317}
   - component: {fileID: 2054661113498224316}
   m_Layer: 0
@@ -122,22 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   rb: {fileID: 2054661113498224318}
---- !u!114 &2054661113498224319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2054661113498224314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b9463f3e47e23347aeb229f604c5f20, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   gunPoint: {fileID: 2054661113649116935}
-  bulletPrefab: {fileID: 2383173086244400379, guid: 5468f61e9d300fe458d070896322fbf7,
-    type: 3}
-  bulletForce: 30
 --- !u!1839735485 &2054661113498224317
 Tilemap:
   m_ObjectHideFlags: 0

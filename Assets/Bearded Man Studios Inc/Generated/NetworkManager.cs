@@ -15,7 +15,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public GameObject[] ExampleProximityPlayerNetworkObject = null;
 		public GameObject[] NetworkCameraNetworkObject = null;
 		public GameObject[] PlayerNetworkObject = null;
-		public GameObject[] TestNetworkObject = null;
+		public GameObject[] ProjectileNetworkObject = null;
 
 		protected virtual void SetupObjectCreatedEvent()
 		{
@@ -148,17 +148,17 @@ namespace BeardedManStudios.Forge.Networking.Unity
 						objectInitialized(newObj, obj);
 				});
 			}
-			else if (obj is TestNetworkObject)
+			else if (obj is ProjectileNetworkObject)
 			{
 				MainThreadManager.Run(() =>
 				{
 					NetworkBehavior newObj = null;
 					if (!NetworkBehavior.skipAttachIds.TryGetValue(obj.NetworkId, out newObj))
 					{
-						if (TestNetworkObject.Length > 0 && TestNetworkObject[obj.CreateCode] != null)
+						if (ProjectileNetworkObject.Length > 0 && ProjectileNetworkObject[obj.CreateCode] != null)
 						{
-							var go = Instantiate(TestNetworkObject[obj.CreateCode]);
-							newObj = go.GetComponent<TestBehavior>();
+							var go = Instantiate(ProjectileNetworkObject[obj.CreateCode]);
+							newObj = go.GetComponent<ProjectileBehavior>();
 						}
 					}
 
@@ -241,13 +241,13 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			
 			return netBehavior;
 		}
-		[Obsolete("Use InstantiateTest instead, its shorter and easier to type out ;)")]
-		public TestBehavior InstantiateTestNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		[Obsolete("Use InstantiateProjectile instead, its shorter and easier to type out ;)")]
+		public ProjectileBehavior InstantiateProjectileNetworkObject(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
 		{
-			var go = Instantiate(TestNetworkObject[index]);
-			var netBehavior = go.GetComponent<TestBehavior>();
+			var go = Instantiate(ProjectileNetworkObject[index]);
+			var netBehavior = go.GetComponent<ProjectileBehavior>();
 			var obj = netBehavior.CreateNetworkObject(Networker, index);
-			go.GetComponent<TestBehavior>().networkObject = (TestNetworkObject)obj;
+			go.GetComponent<ProjectileBehavior>().networkObject = (ProjectileNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			
@@ -510,19 +510,19 @@ namespace BeardedManStudios.Forge.Networking.Unity
 			return netBehavior;
 		}
 		/// <summary>
-		/// Instantiate an instance of Test
+		/// Instantiate an instance of Projectile
 		/// </summary>
 		/// <returns>
-		/// A local instance of TestBehavior
+		/// A local instance of ProjectileBehavior
 		/// </returns>
-		/// <param name="index">The index of the Test prefab in the NetworkManager to Instantiate</param>
+		/// <param name="index">The index of the Projectile prefab in the NetworkManager to Instantiate</param>
 		/// <param name="position">Optional parameter which defines the position of the created GameObject</param>
 		/// <param name="rotation">Optional parameter which defines the rotation of the created GameObject</param>
 		/// <param name="sendTransform">Optional Parameter to send transform data to other connected clients on Instantiation</param>
-		public TestBehavior InstantiateTest(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
+		public ProjectileBehavior InstantiateProjectile(int index = 0, Vector3? position = null, Quaternion? rotation = null, bool sendTransform = true)
 		{
-			var go = Instantiate(TestNetworkObject[index]);
-			var netBehavior = go.GetComponent<TestBehavior>();
+			var go = Instantiate(ProjectileNetworkObject[index]);
+			var netBehavior = go.GetComponent<ProjectileBehavior>();
 
 			NetworkObject obj = null;
 			if (!sendTransform && position == null && rotation == null)
@@ -554,7 +554,7 @@ namespace BeardedManStudios.Forge.Networking.Unity
 				obj = netBehavior.CreateNetworkObject(Networker, index, metadata.CompressBytes());
 			}
 
-			go.GetComponent<TestBehavior>().networkObject = (TestNetworkObject)obj;
+			go.GetComponent<ProjectileBehavior>().networkObject = (ProjectileNetworkObject)obj;
 
 			FinalizeInitialization(go, netBehavior, obj, position, rotation, sendTransform);
 			

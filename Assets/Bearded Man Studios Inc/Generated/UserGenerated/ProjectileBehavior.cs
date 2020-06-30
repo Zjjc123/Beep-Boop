@@ -4,13 +4,12 @@ using UnityEngine;
 
 namespace BeardedManStudios.Forge.Networking.Generated
 {
-	[GeneratedRPC("{\"types\":[[\"Vector3\", \"Quaternion\", \"int\"]]")]
-	[GeneratedRPCVariableNames("{\"types\":[[\"position\", \"rotation\", \"index\"]]")]
-	public abstract partial class PlayerBehavior : NetworkBehavior
+	[GeneratedRPC("{\"types\":[]")]
+	[GeneratedRPCVariableNames("{\"types\":[]")]
+	public abstract partial class ProjectileBehavior : NetworkBehavior
 	{
-		public const byte RPC_SHOOT = 0 + 5;
 		
-		public PlayerNetworkObject networkObject = null;
+		public ProjectileNetworkObject networkObject = null;
 
 		public override void Initialize(NetworkObject obj)
 		{
@@ -18,11 +17,10 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			if (networkObject != null && networkObject.AttachedBehavior != null)
 				return;
 			
-			networkObject = (PlayerNetworkObject)obj;
+			networkObject = (ProjectileNetworkObject)obj;
 			networkObject.AttachedBehavior = this;
 
 			base.SetupHelperRpcs(networkObject);
-			networkObject.RegisterRpc("Shoot", Shoot, typeof(Vector3), typeof(Quaternion), typeof(int));
 
 			networkObject.onDestroy += DestroyGameObject;
 
@@ -80,7 +78,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		public override void Initialize(NetWorker networker, byte[] metadata = null)
 		{
-			Initialize(new PlayerNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
+			Initialize(new ProjectileNetworkObject(networker, createCode: TempAttachCode, metadata: metadata));
 		}
 
 		private void DestroyGameObject(NetWorker sender)
@@ -91,7 +89,7 @@ namespace BeardedManStudios.Forge.Networking.Generated
 
 		public override NetworkObject CreateNetworkObject(NetWorker networker, int createCode, byte[] metadata = null)
 		{
-			return new PlayerNetworkObject(networker, this, createCode, metadata);
+			return new ProjectileNetworkObject(networker, this, createCode, metadata);
 		}
 
 		protected override void InitializedTransform()
@@ -99,13 +97,6 @@ namespace BeardedManStudios.Forge.Networking.Generated
 			networkObject.SnapInterpolations();
 		}
 
-		/// <summary>
-		/// Arguments:
-		/// Vector3 position
-		/// Quaternion rotation
-		/// int index
-		/// </summary>
-		public abstract void Shoot(RpcArgs args);
 
 		// DO NOT TOUCH, THIS GETS GENERATED PLEASE EXTEND THIS CLASS IF YOU WISH TO HAVE CUSTOM CODE ADDITIONS
 	}
