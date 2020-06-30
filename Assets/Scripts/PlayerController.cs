@@ -32,18 +32,34 @@ public class PlayerController : PlayerBehavior
     [SerializeField]
     private int maxHealth = 100;
 
+    [SerializeField]
+    private float firerate = 1f;
+
+    [SerializeField]
+    private Vector3 spawnCenter;
+
+    [SerializeField]
+    private Vector3 spawnSize;
+
     private bool inputDisabled;
-    private bool respawning;
     private bool networkReady;
+
+    private Coroutine respawnCoroutine;
+
+    private float lastTime;
 
     protected override void NetworkStart()
     {
         base.NetworkStart();
 
         playerHealth = maxHealth;
-        networkObject.health = maxHealth;
+
         healthBar = GameObject.FindGameObjectWithTag("HealthBar");
-        healthBar.GetComponent<HealthBar>().SetMaxHealth(maxHealth);
+
+        if (networkObject.IsOwner)
+        {
+            healthBar.GetComponent<HealthBar>().SetMaxHealth(maxHealth);
+        }
 
         networkReady = true;
     }
@@ -53,26 +69,6 @@ public class PlayerController : PlayerBehavior
         // If the network is not ready or input is disabled just return
         if (!networkReady || inputDisabled)
             return;
-
-        // Update Health if it is server
-        // Sync Health   if it is client
-        if (NetworkManager.Instance.IsServer)
-        {
-            networkObject.health = playerHealth;
-            Debug.Log("updating network health of " + networkObject.Owner.NetworkId + " to: " + playerHealth);
-        }
-        else
-        {
-            playerHealth = networkObject.health;
-            Debug.Log("network health of " + networkObject.Owner.NetworkId + " is:" + networkObject.health);
-        }
-
-        // If health is <= 0 start respawning
-        if (playerHealth <= 0 && !respawning)
-        {
-            respawning = true;
-            StartCoroutine("Respawn");
-        }
 
         // ======================= Non Local =======================
         // If not the owner (other players) 
@@ -106,10 +102,13 @@ public class PlayerController : PlayerBehavior
         // If fire1 is pressed, start RPC for shooting
         if (Input.GetButtonDown("Fire1"))
         {
-            networkObject.SendRpc(RPC_SHOOT, Receivers.All);
+            if (Time.time > lastTime + firerate)
+            {
+                networkObject.SendRpc(RPC_SHOOT, Receivers.All);
+                lastTime = Time.time;
+            }
         }
 
-        // Update health bar
         healthBar.GetComponent<HealthBar>().SetHealth(playerHealth);
     }
 
@@ -117,8 +116,45 @@ public class PlayerController : PlayerBehavior
     {
         Instantiate(BulletPrefab, new Vector3(gunPoint.position.x, gunPoint.position.y, 0), gunPoint.rotation);
     }
+    
+    // Only ran on server
+    public void TakeDamage(int dmg)
+    {
+        playerHealth -= dmg;
 
-    IEnumerator Respawn()
+        Debug.Log("Player " + networkObject.Owner.NetworkId + " took " + dmg + " damage with a health now of " + playerHealth);
+
+        if (playerHealth <= 0)
+        {
+            networkObject.SendRpc(RPC_DEATH, Receivers.All);
+        }
+
+        networkObject.SendRpc(RPC_TAKE_DAMAGE, Receivers.All, playerHealth);
+    }
+
+    // RPCS
+    // Called on only the network object that these events took place
+    // Like networkObject1.TakeDamage (across the clients)
+    public override void TakeDamage(RpcArgs args)
+    {
+        // Sync health
+        int healthLeft = args.GetNext<int>();
+    
+        playerHealth = healthLeft;
+    }
+
+    public override void Death(RpcArgs args)
+    {
+        if (respawnCoroutine != null)
+        {
+            StopCoroutine(respawnCoroutine);
+        }
+        respawnCoroutine = StartCoroutine(Respawn(3));
+
+        healthBar.GetComponent<HealthBar>().SetHealth(0);
+    }
+
+    IEnumerator Respawn(int time)
     {
         // Spawn death effect
         GameObject effect = Instantiate(deathEffect, transform.position, Quaternion.identity);
@@ -128,41 +164,31 @@ public class PlayerController : PlayerBehavior
         GetComponent<SpriteRenderer>().enabled = false;
         GetComponent<BoxCollider2D>().enabled = false;
 
-        // Manage health and respawn on the server
-        if (NetworkManager.Instance.IsServer)
+        // Set respawn location
+        if (networkObject.IsOwner)
         {
-            playerHealth = maxHealth;
-            networkObject.health = playerHealth;
-
-            transform.position = new Vector3(0, 0, 0);
+            transform.position = spawnCenter + new Vector3(Random.Range(-spawnSize.x/2, spawnSize.x / 2), Random.Range(-spawnSize.y / 2, spawnSize.y / 2), 1);
             networkObject.position = transform.position;
-        }
-        else
-        {
-            playerHealth = maxHealth;
+
+            // Force position to remove one frame on old location
+            networkObject.positionInterpolation.target = transform.position;
+            networkObject.SnapInterpolations();
         }
 
         inputDisabled = true;
 
         yield return new WaitForSeconds(3);
 
-        // Enable everything
+        playerHealth = maxHealth;
 
         GetComponent<SpriteRenderer>().enabled = true;
         GetComponent<BoxCollider2D>().enabled = true;
 
         inputDisabled = false;
-        respawning = false;
     }
 
-    public void TakeDamage(int dmg)
+    private void OnDrawGizmosSelected()
     {
-        if (NetworkManager.Instance.IsServer)
-        {
-            playerHealth -= dmg;
-            Debug.Log("Player " + networkObject.Owner.NetworkId + " took " + dmg + " damage with a health now of" + playerHealth);
-            networkObject.health = playerHealth;
-        }       
+        Gizmos.DrawCube(spawnCenter, spawnSize);
     }
-    
 }

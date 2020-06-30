@@ -126,7 +126,10 @@ MonoBehaviour:
     type: 3}
   deathEffect: {fileID: 139366, guid: b185c1a9cf067374586d095111b15bd1, type: 3}
   healthBar: {fileID: 0}
-  health: 0
+  playerHealth: 100
+  maxHealth: 100
+  spawnCenter: {x: 2, y: -1.2, z: 0}
+  spawnSize: {x: 38, y: 41, z: 0}
 --- !u!1839735485 &2054661113498224317
 Tilemap:
   m_ObjectHideFlags: 0

@@ -16,6 +16,7 @@ public class Bullet : MonoBehaviour
 
     private void Start()
     {
+        // Simulate bullet on client
         GetComponent<Rigidbody2D>().AddForce(transform.up * bulletForce, ForceMode2D.Impulse);
     }
 
@@ -24,11 +25,12 @@ public class Bullet : MonoBehaviour
         GameObject effect = Instantiate(hitEffect, transform.position, Quaternion.identity);
         Destroy(effect, 5f);
         Destroy(gameObject);
-
+        
         if (NetworkManager.Instance.IsServer)
         {
             if (collision.gameObject.tag == "Player")
                 collision.gameObject.GetComponent<PlayerController>().TakeDamage(bulletDmg);
         }
+        
     }
 }
