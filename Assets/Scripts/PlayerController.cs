@@ -27,7 +27,7 @@ public class PlayerController : PlayerBehavior
     private GameObject healthBar;
 
     [SerializeField]
-    private int health;
+    private int playerHealth;
 
     [SerializeField]
     private int maxHealth = 100;
@@ -40,7 +40,7 @@ public class PlayerController : PlayerBehavior
     {
         base.NetworkStart();
 
-        health = maxHealth;
+        playerHealth = maxHealth;
         networkObject.health = maxHealth;
         healthBar = GameObject.FindGameObjectWithTag("HealthBar");
         healthBar.GetComponent<HealthBar>().SetMaxHealth(maxHealth);
@@ -54,25 +54,38 @@ public class PlayerController : PlayerBehavior
         if (!networkReady || inputDisabled)
             return;
 
+        // Update Health if it is server
+        // Sync Health   if it is client
+        if (NetworkManager.Instance.IsServer)
+        {
+            networkObject.health = playerHealth;
+            Debug.Log("updating network health of " + networkObject.Owner.NetworkId + " to: " + playerHealth);
+        }
+        else
+        {
+            playerHealth = networkObject.health;
+            Debug.Log("network health of " + networkObject.Owner.NetworkId + " is:" + networkObject.health);
+        }
+
+        // If health is <= 0 start respawning
+        if (playerHealth <= 0 && !respawning)
+        {
+            respawning = true;
+            StartCoroutine("Respawn");
+        }
+
+        // ======================= Non Local =======================
         // If not the owner (other players) 
         if (!networkObject.IsOwner)
         {
             // Sync transform
             transform.position = networkObject.position;
             transform.rotation = networkObject.rotation;
-
-            // Sync health
-            health = networkObject.health;
-            
-            // If health is <= 0 start respawning
-            if (health <= 0 && !respawning)
-            {
-                respawning = true;
-                StartCoroutine("Respawn");
-            }
+           
             return;
         }
 
+        // ======================= Local =======================
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
 
@@ -96,23 +109,8 @@ public class PlayerController : PlayerBehavior
             networkObject.SendRpc(RPC_SHOOT, Receivers.All);
         }
 
-        // Update health
-        // Update if it is server
-        // Sync   if it is client
-        if (NetworkManager.Instance.IsServer)
-            networkObject.health = health;
-        else
-            health = networkObject.health;
-
         // Update health bar
-        healthBar.GetComponent<HealthBar>().SetHealth(health);
-
-        // If health is <= 0 start respawning
-        if (health <= 0 && !respawning)
-        {
-            respawning = true;
-            StartCoroutine("Respawn");
-        }
+        healthBar.GetComponent<HealthBar>().SetHealth(playerHealth);
     }
 
     public override void Shoot(RpcArgs args)
@@ -133,15 +131,15 @@ public class PlayerController : PlayerBehavior
         // Manage health and respawn on the server
         if (NetworkManager.Instance.IsServer)
         {
-            health = maxHealth;
-            networkObject.health = health;
+            playerHealth = maxHealth;
+            networkObject.health = playerHealth;
 
             transform.position = new Vector3(0, 0, 0);
             networkObject.position = transform.position;
         }
         else
         {
-            health = maxHealth;
+            playerHealth = maxHealth;
         }
 
         inputDisabled = true;
@@ -161,8 +159,9 @@ public class PlayerController : PlayerBehavior
     {
         if (NetworkManager.Instance.IsServer)
         {
-            health -= dmg;
-            networkObject.health = health;
+            playerHealth -= dmg;
+            Debug.Log("Player " + networkObject.Owner.NetworkId + " took " + dmg + " damage with a health now of" + playerHealth);
+            networkObject.health = playerHealth;
         }       
     }
     
