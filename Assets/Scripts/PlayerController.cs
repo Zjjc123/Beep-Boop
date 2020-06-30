@@ -17,6 +17,9 @@ public class PlayerController : PlayerBehavior
     [SerializeField]
     private Transform gunPoint;
 
+    [SerializeField]
+    private GameObject BulletPrefab;
+
     private uint playerID;
 
     private void Initialize()
@@ -40,7 +43,8 @@ public class PlayerController : PlayerBehavior
         movement.y = Input.GetAxisRaw("Vertical");
 
         Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        rb.MovePosition(rb.position + movement * speed * Time.deltaTime);
+        rb.MovePosition(rb.position + movement.normalized * speed * Time.deltaTime);
+
         Vector2 lookDir = mousePos - rb.position;
         float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
         rb.rotation = angle;
@@ -53,22 +57,12 @@ public class PlayerController : PlayerBehavior
 
         if (Input.GetButtonDown("Fire1"))
         {
-            networkObject.SendRpc(RPC_SHOOT, Receivers.Server, gunPoint.position, gunPoint.rotation, 0);
+            networkObject.SendRpc(RPC_SHOOT, Receivers.All);
         }
     }
 
     public override void Shoot(RpcArgs args)
     {
-        MainThreadManager.Run(() =>
-        {
-            Vector3 pos = args.GetNext<Vector3>();
-            Quaternion rot = args.GetNext<Quaternion>();
-            int index = args.GetNext<int>();
-
-            if (NetworkManager.Instance.IsServer)
-            {
-                ProjectileBehavior pb = NetworkManager.Instance.InstantiateProjectile(index, pos, rot);
-            }
-        });
+        Instantiate(BulletPrefab, new Vector3(gunPoint.position.x, gunPoint.position.y, 0), gunPoint.rotation);
     }
 }

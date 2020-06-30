@@ -98,7 +98,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 1000
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 0
@@ -122,6 +122,8 @@ MonoBehaviour:
   speed: 5
   rb: {fileID: 2054661113498224318}
   gunPoint: {fileID: 2054661113649116935}
+  BulletPrefab: {fileID: 2383173086244400379, guid: 5468f61e9d300fe458d070896322fbf7,
+    type: 3}
 --- !u!1839735485 &2054661113498224317
 Tilemap:
   m_ObjectHideFlags: 0
