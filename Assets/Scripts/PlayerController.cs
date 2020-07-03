@@ -100,7 +100,7 @@ public class PlayerController : PlayerBehavior
         Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -10);
 
         // If fire1 is pressed, start RPC for shooting
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButton("Fire1"))
         {
             if (Time.time > lastTime + firerate)
             {

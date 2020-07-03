@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78a6057d5c579f14ebba50c0506c78f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
+  speed: 7
   rb: {fileID: 2054661113498224318}
   gunPoint: {fileID: 2054661113649116935}
   BulletPrefab: {fileID: 2383173086244400379, guid: 5468f61e9d300fe458d070896322fbf7,
@@ -128,6 +128,7 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   playerHealth: 100
   maxHealth: 100
+  firerate: 0.35
   spawnCenter: {x: 2, y: -1.2, z: 0}
   spawnSize: {x: 38, y: 41, z: 0}
 --- !u!1839735485 &2054661113498224317
